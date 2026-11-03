@@ -1,2 +1,26 @@
-# Jupyter Notebook automatic checkpoints
+# Restricted coursework data
+data/
+output/
+*.db
+*.sqlite
+*.sqlite3
+*.csv
+*.parquet
+
+# Jupyter
 .ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+venv/
+
+# Secrets
+.env
+.env.*
