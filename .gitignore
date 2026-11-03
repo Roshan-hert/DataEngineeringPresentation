@@ -23,4 +23,4 @@ venv/
 
 # Secrets
 .env
-.env.*
+.env.*.DS_Store
