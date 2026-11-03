@@ -1,0 +1,7 @@
+WebApp Popup Survey Questions 
+email = customers email from logged in session.
+reported_income = Q1. "What income bracket are you in?" [drop-down selector]
+nps_recommend = Q2. "Would you recommend us to a friend? (no 0 - 10 yes)" [rating slider 0-10]
+satisfaction_score = Q3. "Would you recommend us to a friend? (no 0 - 10 yes)" [rating slider 0-10]
+online_comparison_freq = Q4. "How much time do you spend online shopping and comparing prices?" [rating slider 0-10]
+
