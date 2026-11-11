@@ -1,11 +1,40 @@
-# Import pandas to read and process CSV files
-import pandas as pd
+from crmEtl import extract_crm, transform_crm, load_crm,engineer_crm_features
+from pathlib import Path
 
-# Define a reusable function to extract CRM data
-def extract_crm(file_path):
+def run_crm_etl():
+    # Define project directory
+    project_dir = Path(__file__).resolve().parent.parent
 
-    # Read the CSV file into a Pandas DataFrame
-    crm_df = pd.read_csv(file_path)
+    # Define input and output paths
+    file_path = project_dir / "data/PerfectPetClub_CRM_report.csv"
+    output_path = project_dir / "output"
 
-    # Return the extracted DataFrame
-    return crm_df
+    # Extract
+    crm_df = extract_crm(file_path)
+
+    # Transform
+    cleaned_crm_df = transform_crm(crm_df)
+
+    # Feature Engineering
+    crm_features_df = engineer_crm_features(cleaned_crm_df)
+
+    # Load
+    load_crm(
+        output_path / "cleaned_crm.parquet",
+        output_path / "cleaned_crm.csv",
+        cleaned_crm_df
+    )
+
+    # Save engineered customer features
+    load_crm(
+        output_path / "crm_features.parquet",
+        output_path / "crm_features.csv",
+        crm_features_df
+    )
+
+    print("CRM ETL and feature engineering completed successfully!")
+
+    return crm_df,cleaned_crm_df,crm_features_df
+
+
+
