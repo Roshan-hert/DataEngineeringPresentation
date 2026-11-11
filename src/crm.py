@@ -1,32 +1,27 @@
-# Import pandas to read and process CSV files
-import pandas as pd
+from etl import extract_crm, transform_crm, load_crm
+from pathlib import Path
 
-# Define a reusable function to extract CRM data
-def extract_crm(file_path):
+def run_crm_etl():
+    # Define project directory
+    project_dir = Path(__file__).resolve().parent.parent
 
-    # Read the CSV file into a Pandas DataFrame
-    crm_df = pd.read_csv(file_path)
+    # Define input and output paths
+    file_path = project_dir / "data/PerfectPetClub_CRM_report.csv"
+    output_path = project_dir / "output"
 
-    # Return the extracted DataFrame
-    return crm_df
-    
-def transform_crm(crm_df):
+    # Extract
+    crm_df = extract_crm(file_path)
 
-    # Create a copy to avoid modifying the original data
-    df = crm_df.copy()
+    # Transform
+    cleaned_crm_df = transform_crm(crm_df)
 
-    # Remove duplicate rows
-    df = df.drop_duplicates()
+    # Load
+    load_crm(
+        output_path / "cleaned_crm.parquet",
+        output_path / "cleaned_crm.csv",
+        cleaned_crm_df
+    )
 
-    # Remove unnecessary spaces from column names
-    df.columns = df.columns.str.strip()
-
-    # Remove rows that are completely empty
-    df = df.dropna(how="all")
-
-    # Convert empty strings to missing values
-    df = df.replace(r"^\s*$", pd.NA, regex=True)
-
-    # Return the cleaned DataFrame
-    return df
+    print("CRM ETL completed successfully!")
+    return crm_df,cleaned_crm_df
 
