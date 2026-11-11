@@ -52,13 +52,14 @@ def extract_customer_subscriptions(db_path: str = "../data/PerfectPetClub.db") -
 
     if df.empty:
         raise ValueError("No customer records extracted.")
-
-
+    
     if len(df) != total_customers:
-        logging.warning(
-            f"Customer count mismatch: original={total_customers}, "
-            f"extracted={len(df)}"
-        )
+    raise ValueError(
+        f"Customer count mismatch: expected {total_customers}, "
+        f"extracted {len(df)}"
+    )
+
+    
     else:
         logging.info(
             f"Customer count verified: {total_customers} records."
@@ -72,11 +73,13 @@ def extract_customer_subscriptions(db_path: str = "../data/PerfectPetClub.db") -
 def validate_customer_data(df: pd.DataFrame) -> Dict[str, Any]:
     """
     Performs automated Data Quality (DQ) checks on customer data:
-    1. Null check on critical identifiers (ID, email, subscription ID)
+    1. Null check on critical identifiers (ID, email, subscription ID, auto_renew)
     2. Primary key uniqueness check (customer_id)
     3. Binary target validity check (auto_renew in {0, 1})
-    4. Date logic check (start_date <= end_date)
+    4. Date validity check (both dates can be parsed)
+    5. Date logic check (start_date <= end_date)
     """
+    
     logging.info("Executing automated Data Quality checks on customer subscriptions...")
     results = {}
 
@@ -146,25 +149,33 @@ def run_pipeline(db_path: str = "../data/PerfectPetClub.db") -> pd.DataFrame:
 
 def transform_customer_features(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Applies feature engineering and GDPR compliance transformations:
-    - Target Variable: 'is_churned' (1 if auto_renew == 0, else 0)
-    - Feature: 'subscription_tenure_days'
-    - Feature: 'postcode_district' (first part of UK postcode)
-    - GDPR Compliance: Drops raw password_hash and full street address
-    """
+    Creates customer and subscription features for churn analysis.
+
+    - is_churned: 1 if auto-renewal is disabled, otherwise 0.
+    - subscription_tenure_days: Days between subscription start and end dates.
+    - postcode_area: Leading letters of the UK postcode.
+
+    Privacy considerations:
+    Password hashes and street addresses are excluded from SQL extraction.
+    Customer names, emails and postcodes are still present in the
+    extracted data and require appropriate handling.
+    
+      """
     logging.info("Applying feature engineering on customer subscriptions...")
     df_transformed = df.copy()
 
     # 1. Target variable for churn analysis
     df_transformed['is_churned'] = (df_transformed['auto_renew'] == 0).astype(int)
 
-    # 2. Tenure duration in days
-    start = pd.to_datetime(df_transformed['sub_start_date'])
-    end = pd.to_datetime(df_transformed['sub_end_date'])
-    df_transformed['subscription_tenure_days'] = (end - start).dt.days
+   # 2. Convert dates to real datetimes, then calculate tenure in days
+    df_transformed['sub_start_date'] = pd.to_datetime(df_transformed['sub_start_date'], format='ISO8601')
+    df_transformed['sub_end_date'] = pd.to_datetime(df_transformed['sub_end_date'], format='ISO8601')
+    df_transformed['subscription_tenure_days'] = (
+        df_transformed['sub_end_date'] - df_transformed['sub_start_date']
+    ).dt.days
 
-    # 3. Geographic feature: extract postcode outward code (e.g., 'SL6' from 'SL6 1CD')
-    df_transformed['postcode_district'] = df_transformed['postcode'].str.split(' ').str[0]
+   # 3. Geographic feature: postcode area = leading letters (e.g., 'SL' from 'SL6 1CD')
+    df_transformed['postcode_area'] = df_transformed['postcode'].str.extract(r'^([A-Za-z]{1,2})')[0].str.upper()
 
     # Calculate churn summary
     churn_count = df_transformed['is_churned'].sum()
