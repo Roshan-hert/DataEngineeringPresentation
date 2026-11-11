@@ -100,8 +100,17 @@ def validate_customer_data(df: pd.DataFrame) -> Dict[str, Any]:
 
 
     # Check 4: Date consistency
-    start = pd.to_datetime(df['sub_start_date'], errors='coerce', format='ISO8601')
-    end = pd.to_datetime(df['sub_end_date'], errors='coerce', format='ISO8601')
+    start = pd.to_datetime(
+        df['sub_start_date'],
+        format='%Y-%m-%d',
+        errors='coerce'
+    )
+    
+    end = pd.to_datetime(
+        df['sub_end_date'],
+        format='%Y-%m-%d',
+        errors='coerce'
+    )
 
     # Check for missing or invalid dates
     valid_dates = start.notna().all() and end.notna().all()
