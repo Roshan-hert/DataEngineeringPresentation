@@ -99,13 +99,13 @@ def validate_customer_data(df: pd.DataFrame) -> Dict[str, Any]:
     # Check 4: Date consistency
     start = pd.to_datetime(
         df['sub_start_date'],
-        format='%Y-%m-%d',
+        format='ISO8601',
         errors='coerce'
     )
     
     end = pd.to_datetime(
         df['sub_end_date'],
-        format='%Y-%m-%d',
+        format='ISO8601',
         errors='coerce'
     )
 
