@@ -1,12 +1,3 @@
-
-
-"""
-Module: extract_sales_reviews.py
-Author: [Her Name]
-Role: Sales Transactions, Spend Metrics & Customer Experience Lead
-Component: PerfectPetClub.db Extraction & Transformation
-"""
-
 import sqlite3
 import pandas as pd
 import logging
