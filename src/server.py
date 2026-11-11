@@ -1,3 +1,4 @@
+
 """
 Perfect Pet Club ETL module.
 
@@ -69,9 +70,10 @@ def transform_data(raw_data: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     """
     Clean event records and aggregate them to one row per customer.
 
-    Returns exactly TWO objects:
-      1. customer_features: one row per customer
-      2. quality_report: dictionary of ETL quality metrics
+    Returns exactly THREE objects:
+      1. clean_data: cleaned event-level records
+      2. customer_features: engineered features, one row per customer
+      3. quality_report: dictionary of ETL quality metrics
 
     The supplied server log does not identify confirmed subscription
     cancellations or renewals. Consequently churn_label remains nullable.
@@ -115,6 +117,9 @@ def transform_data(raw_data: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
 
     if data.empty:
         raise ValueError("No usable records remain after timestamp/login cleaning.")
+
+    #storing cleaned data
+    cleaned_data = data
 
     # Deterministic pseudonymous customer key (not guaranteed anonymisation).
     data["customer_id"] = data["login"].map(
@@ -270,8 +275,8 @@ def transform_data(raw_data: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
         f"{len(customer_features):,} customer records"
     )
 
-    # IMPORTANT: exactly two return values.
-    return customer_features, quality_report
+    # Return cleaned event data, customer-level engineered features, and the ETL quality report.
+    return cleaned_data, customer_features, quality_report
 
 
 def load_data(data: pd.DataFrame, output_path: str | Path) -> Path:
