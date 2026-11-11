@@ -19,7 +19,7 @@ cd DataEngineeringPresentation
 Ensure Python is installed, then run:
 
 ```bash
-pip install -r requirements.txt
+%pip install -r ../requirements.txt
 ```
 
 ### 3. Start Jupyter Lab
