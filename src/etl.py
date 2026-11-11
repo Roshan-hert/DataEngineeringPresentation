@@ -15,11 +15,16 @@ def transform_crm(crm_df):
     # Create a copy to avoid modifying the original data
     df = crm_df.copy()
 
-    # Remove duplicate rows
-    df = df.drop_duplicates()
-
     # Remove unnecessary spaces from column names
     df.columns = df.columns.str.strip()
+    
+    # Check required columns(Schema Validation)
+    required = {"customer_id", "platform", "type", "recieved_datatime"}
+    
+    missing = required - set(df.columns)
+    
+    if missing:
+        raise ValueError(f"Missing columns: {missing}")
 
     # Remove rows that are completely empty
     df = df.dropna(how="all")
@@ -37,6 +42,11 @@ def transform_crm(crm_df):
         df["received_datetime"], errors="coerce"
     )
 
+    # Validation for missing or invalid dates
+    missing_dates = df["received_datetime"].isna().sum()
+    
+    print(f"Missing or invalid dates: {missing_dates}")
+    
     # Clean platform values
     df["platform"] = (
         df["platform"]
@@ -55,6 +65,21 @@ def transform_crm(crm_df):
     # Return the cleaned DataFrame
     return df
 
+def engineer_crm_features(df):
+
+    # Group CRM records by customerid and calculate new features
+    crm_features = df.groupby("customer_id").agg(
+        # Count the total number of interactions per customer
+        total_interactions=("customer_id", "size"),
+
+        # Count how many interactions are complaints
+        complaint_count=("type", lambda x: (x == "complaint").sum())
+
+    ).reset_index()  # Keep customer_id as a normal column
+
+    # Return the engineered dataset
+    return crm_features
+
 def load_crm(output_path,output_path2,df):
 
     
@@ -67,5 +92,4 @@ def load_crm(output_path,output_path2,df):
     # Save cleaned data as Parquet
     df.to_csv(output_path2, index=False)
 
-    print(f"Cleaned data saved as csv and parquet to: {output_path}")
-    print("ETL completed successfully!")
+

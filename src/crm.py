@@ -1,4 +1,4 @@
-from etl import extract_crm, transform_crm, load_crm
+from etl import extract_crm, transform_crm, load_crm,engineer_crm_features
 from pathlib import Path
 
 def run_crm_etl():
@@ -15,6 +15,9 @@ def run_crm_etl():
     # Transform
     cleaned_crm_df = transform_crm(crm_df)
 
+    # Feature Engineering
+    crm_features_df = engineer_crm_features(cleaned_crm_df)
+
     # Load
     load_crm(
         output_path / "cleaned_crm.parquet",
@@ -22,6 +25,16 @@ def run_crm_etl():
         cleaned_crm_df
     )
 
-    print("CRM ETL completed successfully!")
-    return crm_df,cleaned_crm_df
+    # Save engineered customer features
+    load_crm(
+        output_path / "crm_features.parquet",
+        output_path / "crm_features.csv",
+        crm_features_df
+    )
+
+    print("CRM ETL and feature engineering completed successfully!")
+
+    return crm_df,cleaned_crm_df,crm_features_df
+
+
 
