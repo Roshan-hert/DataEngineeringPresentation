@@ -54,10 +54,10 @@ def extract_customer_subscriptions(db_path: str = "../data/PerfectPetClub.db") -
         raise ValueError("No customer records extracted.")
     
     if len(df) != total_customers:
-    raise ValueError(
-        f"Customer count mismatch: expected {total_customers}, "
-        f"extracted {len(df)}"
-    )
+        raise ValueError(
+            f"Customer count mismatch: expected {total_customers}, "
+            f"extracted {len(df)}"
+        )
 
     
     else:
