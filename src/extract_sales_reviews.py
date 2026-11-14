@@ -85,6 +85,17 @@ def validate_sales_review_data(df: pd.DataFrame) -> bool:
     logging.info("All Sales/Review Data Quality checks PASSED successfully (3/3).")
     return True
 
+def run_pipeline(db_path="../data/PerfectPetClub.db") -> pd.DataFrame:
+    """
+    Run extraction and validation.
+    Return the validated DataFrame.
+    """
+    sales_df = extract_sales_and_reviews(db_path)
+    validate_sales_review_data(sales_df)
+
+    logging.info("Sales and Reviews pipeline completed successfully.")
+    return sales_df
+
 
 if __name__ == "__main__":
     sales_df = extract_sales_and_reviews(db_path="data/PerfectPetClub.db")
